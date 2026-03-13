@@ -163,19 +163,6 @@ header h1{
 .voice-row textarea:focus{outline:none;border-color:var(--accent)}
 .voice-row textarea::placeholder{color:var(--text-soft);font-style:italic}
 
-.mic-btn{
-  width:42px;height:42px;border-radius:50%;
-  border:1px solid var(--border);background:var(--card);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-size:1.05rem;color:var(--text-soft);transition:all .15s;
-}
-
-.mic-btn.recording{
-  background:#FFE8F7;border-color:var(--rose);color:var(--rose);
-  animation:pulse 1.2s infinite;
-}
-
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 
 /* Save button */
 .save-btn{
@@ -502,7 +489,6 @@ header h1{
 
       <div class="voice-row">
         <textarea id="noteInput" rows="1" placeholder="Optional note…"></textarea>
-        <button class="mic-btn" id="micBtn" aria-label="Voice input">🎙</button>
       </div>
 
       <button class="save-btn" id="saveBtn">Save Meal</button>
@@ -709,32 +695,6 @@ document.querySelectorAll('.scale-opts').forEach(g=>{
       if(sc==='hunger')hunger=v; else satisfaction=v;
     });
   });
-});
-
-/* ══════════════════════════════════════════
-   Voice input
-   ══════════════════════════════════════════ */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let recog=null;
-
-if(SR){
-  recog=new SR();
-  recog.continuous=false;recog.interimResults=false;recog.lang='en-US';
-  recog.onresult=e=>{
-    const t=e.results[0][0].transcript,inp=document.getElementById('noteInput');
-    inp.value=inp.value?inp.value+' '+t:t;
-    autoR(inp);
-    document.getElementById('micBtn').classList.remove('recording');
-  };
-  recog.onend=()=>document.getElementById('micBtn').classList.remove('recording');
-  recog.onerror=()=>document.getElementById('micBtn').classList.remove('recording');
-}
-
-document.getElementById('micBtn').addEventListener('click',()=>{
-  if(!recog){alert('Voice not supported here.');return}
-  const b=document.getElementById('micBtn');
-  if(b.classList.contains('recording'))recog.stop();
-  else{b.classList.add('recording');recog.start()}
 });
 
 const noteIn=document.getElementById('noteInput');
