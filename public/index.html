@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gentle Eats">
+<meta name="theme-color" content="#faf8f5">
+<link rel="manifest" href="/manifest.json">
+<title>Gentle Eats</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --bg:#faf8f5;
+  --card:#fff;
+  --border:#e8e4df;
+  --text:#2d2a26;
+  --text-mid:#6b6560;
+  --text-soft:#9a938b;
+  --accent:#7a8a6a;
+  --accent-light:#eef2ea;
+  --accent-dark:#5a6a4a;
+  --warm:#c4956a;
+  --warm-light:#faf1e8;
+  --rose:#b87a7a;
+  --radius:14px;
+}
+
+html{font-size:17px;-webkit-text-size-adjust:100%}
+
+body{
+  font-family:'Georgia',serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.55;
+  min-height:100dvh;
+  overscroll-behavior:none;
+  padding-bottom:env(safe-area-inset-bottom,20px);
+}
+
+.app{max-width:480px;margin:0 auto;padding:0 16px}
+
+/* Header */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 4px 16px;
+}
+
+header h1{
+  font-size:1.35rem;font-weight:400;letter-spacing:.01em;color:var(--accent);
+}
+
+.week-nav{display:flex;gap:6px;align-items:center}
+
+.week-nav button{
+  width:36px;height:36px;border-radius:50%;
+  border:1px solid var(--border);background:var(--card);
+  font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-mid);transition:all .15s;
+}
+
+.week-nav button:active{background:var(--accent-light)}
+.week-nav button:disabled{opacity:.25;cursor:default}
+
+.week-label{
+  font-size:.72rem;color:var(--text-soft);
+  font-family:-apple-system,system-ui,sans-serif;
+  min-width:60px;text-align:center;
+}
+
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+
+.tab{
+  flex:1;padding:10px 0;text-align:center;
+  font-family:inherit;font-size:.78rem;color:var(--text-soft);
+  background:none;border:none;border-bottom:2px solid transparent;
+  cursor:pointer;transition:all .2s;letter-spacing:.03em;
+}
+
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* Views */
+.view{display:none}
+.view.active{display:block}
+
+/* Photo capture */
+.capture-area{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:20px;
+}
+
+.photo-preview{
+  position:relative;aspect-ratio:4/3;background:#eae7e2;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;overflow:hidden;
+}
+
+.photo-preview img{width:100%;height:100%;object-fit:cover;display:none}
+.photo-placeholder{text-align:center;color:var(--text-soft)}
+.photo-placeholder .cam-icon{font-size:2.4rem;display:block;margin-bottom:8px;opacity:.6}
+.photo-placeholder span{font-size:.78rem;font-style:italic}
+.photo-preview.has-photo .photo-placeholder{display:none}
+.photo-preview.has-photo img{display:block}
+
+.retake-btn{
+  position:absolute;top:10px;right:10px;
+  width:32px;height:32px;border-radius:50%;
+  background:rgba(0,0,0,.45);border:none;color:#fff;
+  font-size:.85rem;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+}
+
+.photo-preview.has-photo .retake-btn{display:flex}
+
+#cameraInput{display:none}
+
+/* Scales */
+.scales{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+
+.scale-row{display:flex;align-items:center;gap:10px}
+
+.scale-label{font-size:.76rem;color:var(--text-mid);min-width:78px;flex-shrink:0}
+
+.scale-opts{display:flex;gap:6px;flex:1}
+
+.scale-btn{
+  flex:1;padding:9px 0;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);
+  font-family:-apple-system,system-ui,sans-serif;font-size:.82rem;
+  color:var(--text-mid);cursor:pointer;transition:all .15s;text-align:center;
+}
+
+.scale-btn .sub{font-size:.6rem;color:var(--text-soft);display:block;margin-top:1px}
+
+.scale-btn.selected{
+  border-color:var(--accent);background:var(--accent-light);color:var(--accent);
+}
+
+.scale-btn.selected .sub{color:var(--accent)}
+.scale-btn:active{transform:scale(.96)}
+
+/* Voice note row */
+.voice-row{display:flex;gap:8px;padding:0 18px 16px;align-items:flex-end}
+
+.voice-row textarea{
+  flex:1;font-family:inherit;font-size:.84rem;
+  border:1px solid var(--border);border-radius:10px;
+  padding:10px 13px;resize:none;min-height:42px;max-height:100px;
+  line-height:1.4;color:var(--text);background:var(--bg);
+}
+
+.voice-row textarea:focus{outline:none;border-color:var(--accent)}
+.voice-row textarea::placeholder{color:var(--text-soft);font-style:italic}
+
+.mic-btn{
+  width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--border);background:var(--card);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:1.05rem;color:var(--text-soft);transition:all .15s;
+}
+
+.mic-btn.recording{
+  background:#f5e0e0;border-color:var(--rose);color:var(--rose);
+  animation:pulse 1.2s infinite;
+}
+
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* Save button */
+.save-btn{
+  width:calc(100% - 36px);margin:0 18px 18px;padding:14px;
+  border-radius:10px;border:none;background:var(--accent);color:#fff;
+  font-family:inherit;font-size:.9rem;cursor:pointer;
+  letter-spacing:.02em;transition:all .15s;
+}
+
+.save-btn:active{transform:scale(.98);opacity:.9}
+.save-btn:disabled{opacity:.35;cursor:default}
+
+/* Today's meal feed */
+.today-feed h2{
+  font-size:.72rem;font-weight:400;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--text-soft);margin-bottom:12px;padding:0 4px;
+}
+
+.meal-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;margin-bottom:14px;
+  animation:slideUp .35s ease;
+}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.meal-card-photo{aspect-ratio:4/3;background:#eae7e2;overflow:hidden}
+.meal-card-photo img{width:100%;height:100%;object-fit:cover}
+
+.meal-card-info{padding:12px 14px;display:flex;flex-direction:column;gap:5px}
+
+.meal-card-time{
+  font-size:.68rem;color:var(--text-soft);
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+.meal-card-note{font-size:.82rem;color:var(--text);line-height:1.45;font-style:italic}
+
+.meal-card-scales{
+  display:flex;gap:14px;font-size:.72rem;color:var(--text-mid);
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+.meal-card-scales span{display:flex;align-items:center;gap:4px}
+
+.no-photo-card{padding:14px}
+
+.empty-state{
+  text-align:center;padding:48px 20px;
+  color:var(--text-soft);font-style:italic;font-size:.86rem;line-height:1.6;
+}
+
+/* Week view */
+.day-group{margin-bottom:24px}
+
+.day-header{
+  font-size:.74rem;font-weight:400;color:var(--text-soft);
+  text-transform:uppercase;letter-spacing:.06em;
+  padding:0 4px 10px;
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+.day-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;
+}
+
+.grid-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+}
+
+.grid-card-photo{aspect-ratio:1;background:#eae7e2;overflow:hidden}
+.grid-card-photo img{width:100%;height:100%;object-fit:cover}
+
+.grid-card-meta{
+  padding:8px 10px;font-size:.66rem;color:var(--text-mid);
+  font-family:-apple-system,system-ui,sans-serif;
+  display:flex;justify-content:space-between;
+}
+
+.grid-card-no-photo{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:.76rem;color:var(--text-soft);font-style:italic;
+  padding:12px;text-align:center;line-height:1.4;
+}
+
+.week-empty{
+  text-align:center;padding:60px 20px;
+  color:var(--text-soft);font-style:italic;font-size:.86rem;
+}
+
+/* Settings */
+.settings-view{padding:20px 4px}
+.settings-view h2{font-size:.9rem;font-weight:400;color:var(--text);margin-bottom:16px}
+
+.setting-item{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 0;border-bottom:1px solid var(--border);
+  font-size:.84rem;color:var(--text-mid);
+}
+
+.setting-item button{
+  font-family:inherit;font-size:.78rem;padding:8px 16px;
+  border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--text-mid);cursor:pointer;
+}
+
+.setting-item button:active{background:var(--accent-light)}
+.setting-item .danger{color:var(--rose);border-color:var(--rose)}
+
+.settings-note{
+  text-align:center;color:var(--text-soft);
+  font-size:.72rem;font-style:italic;padding:20px 0 0;
+}
+
+/* Metrics */
+.period-toggle{
+  display:flex;gap:0;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:20px;
+}
+
+.period-btn{
+  flex:1;padding:9px 0;
+  font-family:-apple-system,system-ui,sans-serif;font-size:.74rem;
+  color:var(--text-soft);background:none;border:none;
+  cursor:pointer;transition:all .15s;letter-spacing:.02em;
+}
+
+.period-btn.active{
+  background:var(--accent-light);color:var(--accent);font-weight:600;
+}
+
+.metric-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:14px;
+}
+
+.metric-title{
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--text-soft);margin-bottom:14px;
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+.metric-visual{
+  display:flex;align-items:center;justify-content:center;
+  min-height:64px;margin-bottom:10px;
+}
+
+.metric-label{
+  font-size:.82rem;color:var(--text);text-align:center;line-height:1.5;
+}
+
+.metric-sub{
+  font-size:.72rem;color:var(--text-soft);text-align:center;
+  margin-top:3px;font-style:italic;
+}
+
+.metric-empty{
+  font-size:.8rem;color:var(--text-soft);font-style:italic;
+  text-align:center;padding:8px 0;
+}
+
+/* Comparison bars */
+.comp-bars{display:flex;gap:20px;align-items:flex-end;justify-content:center;width:100%}
+
+.comp-bar-group{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:140px}
+
+.comp-bar-track{
+  width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden;
+}
+
+.comp-bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+
+.comp-bar-label{
+  font-size:.66rem;color:var(--text-soft);text-align:center;
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+.comp-bar-val{
+  font-size:.82rem;color:var(--text);font-weight:500;
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+/* Dot row for meals per day */
+.dot-row{display:flex;gap:8px;align-items:flex-end;justify-content:center}
+
+.dot-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+
+.dot-circle{border-radius:50%;background:var(--accent);opacity:.7;transition:all .3s}
+
+.dot-day-label{
+  font-size:.58rem;color:var(--text-soft);
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+/* Time-of-day zones */
+.time-zones{display:flex;width:100%;gap:2px;height:56px;align-items:flex-end}
+
+.time-zone{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-end;gap:3px;
+  border-radius:8px;padding:6px 4px;min-height:56px;
+}
+
+.time-zone-morning{background:#f7f4ee}
+.time-zone-afternoon{background:#f2f6ee}
+.time-zone-evening{background:#eef0f6}
+
+.time-dots{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}
+
+.time-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.6;
+}
+
+.time-zone-label{
+  font-size:.58rem;color:var(--text-soft);margin-top:4px;
+  font-family:-apple-system,system-ui,sans-serif;
+}
+
+/* Toast */
+.toast{
+  position:fixed;
+  bottom:32px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--accent);color:#fff;
+  font-family:-apple-system,system-ui,sans-serif;
+  font-size:.82rem;letter-spacing:.02em;
+  padding:12px 24px;border-radius:24px;
+  opacity:0;pointer-events:none;
+  transition:all .35s ease;
+  z-index:40;
+  box-shadow:0 4px 16px rgba(0,0,0,.12);
+}
+
+.toast.visible{
+  opacity:1;transform:translateX(-50%) translateY(0);
+}
+
+/* Dialog */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.3);
+  display:none;align-items:center;justify-content:center;z-index:50;
+}
+
+.overlay.visible{display:flex}
+
+.dialog{
+  background:#fff;border-radius:16px;padding:26px 22px;
+  max-width:300px;width:88%;text-align:center;
+}
+
+.dialog p{font-size:.88rem;margin-bottom:18px;line-height:1.5;color:var(--text)}
+.dialog-btns{display:flex;gap:10px}
+
+.dialog-btns button{
+  flex:1;font-family:inherit;font-size:.82rem;padding:11px;
+  border-radius:10px;border:1px solid var(--border);cursor:pointer;
+}
+
+.dialog-btns .cancel{background:#fff;color:var(--text-soft)}
+.dialog-btns .confirm{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+@media(max-width:360px){
+  html{font-size:15px}
+  .day-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Gentle Eats</h1>
+    <div class="week-nav" id="weekNav" style="display:none">
+      <button id="prevWeek">‹</button>
+      <span class="week-label" id="weekLabel"></span>
+      <button id="nextWeek">›</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="today">Today</button>
+    <button class="tab" data-tab="week">Week</button>
+    <button class="tab" data-tab="metrics">Metrics</button>
+    <button class="tab" data-tab="settings">More</button>
+  </div>
+
+  <!-- TODAY -->
+  <div class="view active" id="todayView">
+    <div class="capture-area">
+      <div class="photo-preview" id="photoPreview">
+        <div class="photo-placeholder">
+          <span class="cam-icon">📷</span>
+          <span>Tap to snap your meal</span>
+        </div>
+        <img id="previewImg" alt="Meal photo">
+        <button class="retake-btn" id="retakeBtn">✕</button>
+      </div>
+      <input type="file" id="cameraInput" accept="image/*">
+
+      <div class="scales">
+        <div class="scale-row">
+          <div class="scale-label">Hungry?</div>
+          <div class="scale-opts" data-scale="hunger">
+            <button class="scale-btn" data-val="1">1<span class="sub">not really</span></button>
+            <button class="scale-btn" data-val="2">2<span class="sub">somewhat</span></button>
+            <button class="scale-btn" data-val="3">3<span class="sub">starving</span></button>
+          </div>
+        </div>
+        <div class="scale-row">
+          <div class="scale-label">Satisfied?</div>
+          <div class="scale-opts" data-scale="satisfaction">
+            <button class="scale-btn" data-val="1">1<span class="sub">meh</span></button>
+            <button class="scale-btn" data-val="2">2<span class="sub">good</span></button>
+            <button class="scale-btn" data-val="3">3<span class="sub">perfect</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-row">
+        <textarea id="noteInput" rows="1" placeholder="Optional note…"></textarea>
+        <button class="mic-btn" id="micBtn" aria-label="Voice input">🎙</button>
+      </div>
+
+      <button class="save-btn" id="saveBtn">Save Meal</button>
+    </div>
+
+    <div class="today-feed" id="todayFeed"></div>
+  </div>
+
+  <!-- WEEK -->
+  <div class="view" id="weekView"></div>
+
+  <!-- METRICS -->
+  <div class="view" id="metricsView">
+    <div class="period-toggle">
+      <button class="period-btn active" data-days="7">7 days</button>
+      <button class="period-btn" data-days="30">30 days</button>
+      <button class="period-btn" data-days="365">1 year</button>
+    </div>
+    <div id="metricsCards"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="view" id="settingsView">
+    <div class="settings-view">
+      <h2>Settings</h2>
+      <div class="setting-item">
+        <span>Export this week</span>
+        <button id="exportBtn">CSV</button>
+      </div>
+      <div class="setting-item">
+        <span>Clear all data</span>
+        <button class="danger" id="clearAllBtn">Clear</button>
+      </div>
+      <p class="settings-note">Photos stay in this app — never saved to your camera roll.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay">
+  <div class="dialog">
+    <p id="dialogMsg"></p>
+    <div class="dialog-btns">
+      <button class="cancel" id="dialogCancel">Cancel</button>
+      <button class="confirm" id="dialogConfirm">Yes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   IndexedDB — photos + meals, no camera roll
+   ══════════════════════════════════════════ */
+const DB='gentleeats', VER=1;
+let db=null;
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB,VER);
+    r.onupgradeneeded=e=>{
+      const d=e.target.result;
+      if(!d.objectStoreNames.contains('meals')){
+        const s=d.createObjectStore('meals',{keyPath:'id',autoIncrement:true});
+        s.createIndex('date','date',{unique:false});
+      }
+    };
+    r.onsuccess=e=>{db=e.target.result;res(db)};
+    r.onerror=e=>rej(e);
+  });
+}
+
+function dbAdd(meal){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('meals','readwrite');
+    tx.objectStore('meals').add(meal).onsuccess=e=>res(e.target.result);
+    tx.onerror=e=>rej(e);
+  });
+}
+
+function dbRange(s,e){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('meals','readonly');
+    const req=tx.objectStore('meals').index('date').getAll(IDBKeyRange.bound(s,e));
+    req.onsuccess=()=>res(req.result);
+    req.onerror=e=>rej(e);
+  });
+}
+
+function dbClear(){
+  return new Promise((res,rej)=>{
+    const tx=db.transaction('meals','readwrite');
+    tx.objectStore('meals').clear().onsuccess=()=>res();
+    tx.onerror=e=>rej(e);
+  });
+}
+
+/* ══════════════════════════════════════════
+   Helpers
+   ══════════════════════════════════════════ */
+const today=()=>new Date().toISOString().slice(0,10);
+const fmtTime=iso=>new Date(iso).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});
+const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+
+function fmtDayLabel(ds){
+  const d=new Date(ds+'T12:00:00'), t=today();
+  const y=new Date();y.setDate(y.getDate()-1);
+  if(ds===t) return 'Today';
+  if(ds===y.toISOString().slice(0,10)) return 'Yesterday';
+  return d.toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'});
+}
+
+function weekRange(off){
+  const now=new Date(), day=now.getDay();
+  const mon=new Date(now);
+  mon.setDate(now.getDate()-((day+6)%7)+(off*7));
+  mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  return{
+    start:mon.toISOString().slice(0,10),
+    end:sun.toISOString().slice(0,10),
+    label:mon.toLocaleDateString([],{month:'short',day:'numeric'})+' – '+
+          sun.toLocaleDateString([],{month:'short',day:'numeric'})
+  };
+}
+
+const hLabels={1:'not hungry',2:'somewhat',3:'starving'};
+const sLabels={1:'meh',2:'good',3:'perfect'};
+
+/* ══════════════════════════════════════════
+   Photo capture — stays in IndexedDB only
+   ══════════════════════════════════════════ */
+let photoB64=null;
+const camIn=document.getElementById('cameraInput');
+const preview=document.getElementById('photoPreview');
+const prevImg=document.getElementById('previewImg');
+
+preview.addEventListener('click',e=>{
+  if(e.target.closest('.retake-btn'))return;
+  if(!preview.classList.contains('has-photo')) camIn.click();
+});
+
+document.getElementById('retakeBtn').addEventListener('click',()=>{
+  photoB64=null;
+  preview.classList.remove('has-photo');
+  prevImg.src='';
+  camIn.value='';
+});
+
+/* Read file directly as base64, then compress via canvas */
+camIn.addEventListener('change',e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      try{
+        const c=document.createElement('canvas');
+        let w=img.width,h=img.height;
+        const maxDim=800;
+        if(w>h&&w>maxDim){h=Math.round(h*(maxDim/w));w=maxDim}
+        else if(h>maxDim){w=Math.round(w*(maxDim/h));h=maxDim}
+        c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        /* Use toDataURL — works reliably on iOS Safari unlike toBlob */
+        photoB64=c.toDataURL('image/jpeg',0.7);
+        prevImg.src=photoB64;
+        preview.classList.add('has-photo');
+      }catch(err){
+        /* Fallback: use original file as-is */
+        photoB64=ev.target.result;
+        prevImg.src=photoB64;
+        preview.classList.add('has-photo');
+      }
+    };
+    img.onerror=function(){
+      /* If Image() fails, use raw base64 */
+      photoB64=ev.target.result;
+      prevImg.src=photoB64;
+      preview.classList.add('has-photo');
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(f);
+});
+
+/* ══════════════════════════════════════════
+   Scales
+   ══════════════════════════════════════════ */
+let hunger=null, satisfaction=null;
+
+document.querySelectorAll('.scale-opts').forEach(g=>{
+  const sc=g.dataset.scale;
+  g.querySelectorAll('.scale-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const v=+btn.dataset.val;
+      // Toggle off if same
+      if(sc==='hunger'&&hunger===v){hunger=null;btn.classList.remove('selected');return}
+      if(sc==='satisfaction'&&satisfaction===v){satisfaction=null;btn.classList.remove('selected');return}
+      g.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      if(sc==='hunger')hunger=v; else satisfaction=v;
+    });
+  });
+});
+
+/* ══════════════════════════════════════════
+   Voice input
+   ══════════════════════════════════════════ */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let recog=null;
+
+if(SR){
+  recog=new SR();
+  recog.continuous=false;recog.interimResults=false;recog.lang='en-US';
+  recog.onresult=e=>{
+    const t=e.results[0][0].transcript,inp=document.getElementById('noteInput');
+    inp.value=inp.value?inp.value+' '+t:t;
+    autoR(inp);
+    document.getElementById('micBtn').classList.remove('recording');
+  };
+  recog.onend=()=>document.getElementById('micBtn').classList.remove('recording');
+  recog.onerror=()=>document.getElementById('micBtn').classList.remove('recording');
+}
+
+document.getElementById('micBtn').addEventListener('click',()=>{
+  if(!recog){alert('Voice not supported here.');return}
+  const b=document.getElementById('micBtn');
+  if(b.classList.contains('recording'))recog.stop();
+  else{b.classList.add('recording');recog.start()}
+});
+
+const noteIn=document.getElementById('noteInput');
+function autoR(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px'}
+noteIn.addEventListener('input',()=>autoR(noteIn));
+
+/* ══════════════════════════════════════════
+   Toast
+   ══════════════════════════════════════════ */
+let toastTimer=null;
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.classList.add('visible');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('visible'),2200);
+}
+
+/* ══════════════════════════════════════════
+   Save meal
+   ══════════════════════════════════════════ */
+document.getElementById('saveBtn').addEventListener('click',async()=>{
+  /* Allow save if ANY input was given: photo, scale, or note */
+  if(!photoB64&&!noteIn.value.trim()&&hunger===null&&satisfaction===null)return;
+
+  const meal={
+    date:today(),
+    time:new Date().toISOString(),
+    photo:photoB64||null,
+    hunger,satisfaction,
+    note:noteIn.value.trim()||null
+  };
+
+  try{ await dbAdd(meal) }catch(err){ console.error('Save failed',err);return }
+
+  // Reset form
+  photoB64=null;
+  preview.classList.remove('has-photo');
+  prevImg.src='';camIn.value='';
+  noteIn.value='';autoR(noteIn);
+  hunger=null;satisfaction=null;
+  document.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('selected'));
+
+  showToast('Meal logged ✓');
+  renderToday();
+});
+
+/* ══════════════════════════════════════════
+   Render today + recent days
+   ══════════════════════════════════════════ */
+async function renderToday(){
+  const todayDate=today();
+  // Get today's meals
+  const todayMeals=await dbRange(todayDate,todayDate);
+  // Get last 6 days before today for recent section
+  const recentStart=new Date();recentStart.setDate(recentStart.getDate()-6);
+  const recentStartStr=recentStart.toISOString().slice(0,10);
+  const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+  const yesterdayStr=yesterday.toISOString().slice(0,10);
+  const recentMeals=await dbRange(recentStartStr,yesterdayStr);
+
+  const feed=document.getElementById('todayFeed');
+  let html='';
+
+  // Today's meals
+  if(todayMeals.length){
+    const sorted=[...todayMeals].reverse();
+    html+='<h2>Today</h2>'+sorted.map(m=>renderMealCard(m)).join('');
+  } else {
+    html+='<div class="empty-state">No meals yet today.<br>Snap a photo when you eat.</div>';
+  }
+
+  // Recent days
+  if(recentMeals.length){
+    const grouped={};
+    recentMeals.forEach(m=>{if(!grouped[m.date])grouped[m.date]=[];grouped[m.date].push(m)});
+    const dates=Object.keys(grouped).sort().reverse();
+
+    html+='<div style="margin-top:28px">';
+    html+='<h2>Recent</h2>';
+    dates.forEach(date=>{
+      const label=fmtDayLabel(date);
+      const dayMeals=grouped[date];
+      html+=`<div style="font-size:.68rem;color:var(--text-soft);font-family:-apple-system,system-ui,sans-serif;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px 4px">${label}</div>`;
+      dayMeals.reverse().forEach(m=>{ html+=renderMealCard(m) });
+    });
+    html+='</div>';
+  }
+
+  feed.innerHTML=html;
+}
+
+function renderMealCard(m){
+  const time=fmtTime(m.time);
+  const ht=m.hunger?`🍽 ${hLabels[m.hunger]}`:'';
+  const st=m.satisfaction?`✦ ${sLabels[m.satisfaction]}`:'';
+
+  if(m.photo){
+    return`<div class="meal-card">
+      <div class="meal-card-photo"><img src="${m.photo}" alt="" loading="lazy"></div>
+      <div class="meal-card-info">
+        <div class="meal-card-time">${time}</div>
+        ${m.note?`<div class="meal-card-note">${esc(m.note)}</div>`:''}
+        <div class="meal-card-scales">${ht?`<span>${ht}</span>`:''}${st?`<span>${st}</span>`:''}</div>
+      </div>
+    </div>`;
+  }
+  return`<div class="meal-card no-photo-card"><div class="meal-card-info">
+    <div class="meal-card-time">${time}</div>
+    ${m.note?`<div class="meal-card-note">${esc(m.note)}</div>`:''}
+    <div class="meal-card-scales">${ht?`<span>${ht}</span>`:''}${st?`<span>${st}</span>`:''}</div>
+  </div></div>`;
+}
+
+/* ══════════════════════════════════════════
+   Render week
+   ══════════════════════════════════════════ */
+let wOff=0;
+
+async function renderWeek(){
+  const r=weekRange(wOff);
+  document.getElementById('weekLabel').textContent=r.label;
+  document.getElementById('nextWeek').disabled=(wOff>=0);
+
+  const meals=await dbRange(r.start,r.end);
+  const wv=document.getElementById('weekView');
+
+  if(!meals.length){wv.innerHTML='<div class="week-empty">No meals this week.</div>';return}
+
+  const grouped={};
+  meals.forEach(m=>{if(!grouped[m.date])grouped[m.date]=[];grouped[m.date].push(m)});
+  const dates=Object.keys(grouped).sort().reverse();
+
+  wv.innerHTML=dates.map(date=>{
+    const dm=grouped[date];
+    return`<div class="day-group">
+      <div class="day-header">${fmtDayLabel(date)}</div>
+      <div class="day-grid">${dm.map(m=>{
+        const ht=m.hunger?`🍽${m.hunger}`:'';
+        const st=m.satisfaction?`✦${m.satisfaction}`:'';
+        if(m.photo){
+          return`<div class="grid-card">
+            <div class="grid-card-photo"><img src="${m.photo}" alt="" loading="lazy"></div>
+            <div class="grid-card-meta"><span>${fmtTime(m.time)}</span><span>${ht} ${st}</span></div>
+          </div>`;
+        }
+        return`<div class="grid-card">
+          <div class="grid-card-no-photo">${m.note?esc(m.note).slice(0,60):'No photo'}</div>
+          <div class="grid-card-meta"><span>${fmtTime(m.time)}</span><span>${ht} ${st}</span></div>
+        </div>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+document.getElementById('prevWeek').addEventListener('click',()=>{wOff--;renderWeek()});
+document.getElementById('nextWeek').addEventListener('click',()=>{if(wOff<0){wOff++;renderWeek()}});
+
+/* ══════════════════════════════════════════
+   Tabs
+   ══════════════════════════════════════════ */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    tab.classList.add('active');
+    const t=tab.dataset.tab, wn=document.getElementById('weekNav');
+    if(t==='today'){
+      document.getElementById('todayView').classList.add('active');
+      wn.style.display='none';renderToday();
+    }else if(t==='week'){
+      document.getElementById('weekView').classList.add('active');
+      wn.style.display='flex';wOff=0;renderWeek();
+    }else if(t==='metrics'){
+      document.getElementById('metricsView').classList.add('active');
+      wn.style.display='none';renderMetrics();
+    }else{
+      document.getElementById('settingsView').classList.add('active');
+      wn.style.display='none';
+    }
+  });
+});
+
+/* ══════════════════════════════════════════
+   Metrics
+   ══════════════════════════════════════════ */
+let metricsDays=7;
+
+document.querySelectorAll('.period-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    metricsDays=+btn.dataset.days;
+    renderMetrics();
+  });
+});
+
+function dateNDaysAgo(n){
+  const d=new Date();d.setDate(d.getDate()-(n-1));
+  return d.toISOString().slice(0,10);
+}
+
+async function renderMetrics(){
+  const startDate=dateNDaysAgo(metricsDays);
+  const endDate=today();
+  const meals=await dbRange(startDate,endDate);
+  const container=document.getElementById('metricsCards');
+
+  if(!meals.length){
+    container.innerHTML='<div class="metric-empty" style="padding:60px 20px">No meals in this period yet.<br>Start logging to see insights.</div>';
+    return;
+  }
+
+  const withHunger=meals.filter(m=>m.hunger!==null&&m.hunger!==undefined);
+  const withSat=meals.filter(m=>m.satisfaction!==null&&m.satisfaction!==undefined);
+
+  let html='';
+
+  /* 1. % eaten when hungry (hunger >= 2) */
+  html+=renderHungerPercent(withHunger);
+
+  /* 2. Average satisfaction */
+  html+=renderAvgSatisfaction(withSat);
+
+  /* 3. Hunger → satisfaction insight */
+  html+=renderHungerSatInsight(meals);
+
+  /* 4. Meals per day (dot row — last 7 actual days regardless of period) */
+  html+=renderMealsPerDay(meals,metricsDays);
+
+  /* 5. Time of day pattern */
+  html+=renderTimeOfDay(meals);
+
+  container.innerHTML=html;
+}
+
+function renderHungerPercent(withHunger){
+  if(withHunger.length<1) return mCard('Eaten when hungry','<div class="metric-empty">Rate hunger on meals to see this</div>');
+  const hungry=withHunger.filter(m=>m.hunger>=2).length;
+  const pct=Math.round((hungry/withHunger.length)*100);
+  const angle=pct/100*360;
+
+  // SVG ring
+  const r=30,stroke=7,cx=38,cy=38;
+  const circ=2*Math.PI*r;
+  const dashLen=circ*(pct/100);
+
+  const svg=`<svg width="76" height="76" viewBox="0 0 76 76">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e8e4df" stroke-width="${stroke}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#7a8a6a" stroke-width="${stroke}"
+      stroke-dasharray="${dashLen} ${circ}" stroke-linecap="round"
+      transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dasharray .5s ease"/>
+    <text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="middle"
+      font-family="-apple-system,system-ui,sans-serif" font-size="13" fill="#2d2a26" font-weight="500">${pct}%</text>
+  </svg>`;
+
+  return mCard('Eaten when hungry',
+    `<div class="metric-visual">${svg}</div>
+     <div class="metric-label">${hungry} of ${withHunger.length} rated meals</div>
+     <div class="metric-sub">when hunger was 2 or 3</div>`);
+}
+
+function renderAvgSatisfaction(withSat){
+  if(withSat.length<1) return mCard('Average satisfaction','<div class="metric-empty">Rate satisfaction on meals to see this</div>');
+  const avg=withSat.reduce((s,m)=>s+m.satisfaction,0)/withSat.length;
+  const pct=((avg-1)/2)*100; // 1=0%, 3=100% along the spectrum
+
+  const svg=`<svg width="200" height="40" viewBox="0 0 200 40">
+    <line x1="20" y1="20" x2="180" y2="20" stroke="#e8e4df" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="20" cy="20" r="5" fill="${avg<1.3?'#7a8a6a':'#d4e4d4'}" opacity="${avg<1.3?1:.5}"/>
+    <circle cx="100" cy="20" r="5" fill="${avg>=1.3&&avg<2.5?'#7a8a6a':'#d4e4d4'}" opacity="${avg>=1.3&&avg<2.5?1:.5}"/>
+    <circle cx="180" cy="20" r="5" fill="${avg>=2.5?'#7a8a6a':'#d4e4d4'}" opacity="${avg>=2.5?1:.5}"/>
+    <circle cx="${20+pct*1.6}" cy="20" r="8" fill="#7a8a6a" stroke="#fff" stroke-width="2" style="transition:cx .4s ease"/>
+    <text x="20" y="36" text-anchor="middle" font-family="-apple-system,system-ui,sans-serif" font-size="9" fill="#9a938b">meh</text>
+    <text x="100" y="36" text-anchor="middle" font-family="-apple-system,system-ui,sans-serif" font-size="9" fill="#9a938b">good</text>
+    <text x="180" y="36" text-anchor="middle" font-family="-apple-system,system-ui,sans-serif" font-size="9" fill="#9a938b">perfect</text>
+  </svg>`;
+
+  return mCard('Average satisfaction',
+    `<div class="metric-visual">${svg}</div>
+     <div class="metric-label">${avg.toFixed(1)} average across ${withSat.length} meals</div>`);
+}
+
+function renderHungerSatInsight(meals){
+  const hungryMeals=meals.filter(m=>m.hunger>=2&&m.satisfaction!=null);
+  const notHungryMeals=meals.filter(m=>m.hunger===1&&m.satisfaction!=null);
+
+  if(hungryMeals.length<2||notHungryMeals.length<2){
+    return mCard('Hunger → satisfaction',
+      '<div class="metric-empty">Not enough data yet — keep rating both hunger and satisfaction</div>');
+  }
+
+  const avgHungry=hungryMeals.reduce((s,m)=>s+m.satisfaction,0)/hungryMeals.length;
+  const avgNot=notHungryMeals.reduce((s,m)=>s+m.satisfaction,0)/notHungryMeals.length;
+
+  const maxW=100;
+  const hW=Math.max(10,Math.round((avgHungry/3)*maxW));
+  const nW=Math.max(10,Math.round((avgNot/3)*maxW));
+
+  return mCard('Hunger → satisfaction',
+    `<div class="comp-bars">
+      <div class="comp-bar-group">
+        <div class="comp-bar-val">${avgHungry.toFixed(1)}</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:${hW}%;background:var(--accent)"></div></div>
+        <div class="comp-bar-label">when hungry</div>
+      </div>
+      <div class="comp-bar-group">
+        <div class="comp-bar-val">${avgNot.toFixed(1)}</div>
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:${nW}%;background:var(--warm)"></div></div>
+        <div class="comp-bar-label">when not hungry</div>
+      </div>
+    </div>
+    <div class="metric-sub" style="margin-top:12px">${
+      avgHungry>avgNot+0.2?'You tend to enjoy meals more when you eat hungry.'
+      :avgNot>avgHungry+0.2?'Interestingly, you seem just as satisfied eating when not very hungry.'
+      :'About the same either way — no strong pattern.'
+    }</div>`);
+}
+
+function renderMealsPerDay(meals,periodDays){
+  // Show last 7 calendar days as dots regardless of period
+  const showDays=Math.min(periodDays,7);
+  const days=[];
+  for(let i=showDays-1;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    const dayLabel=d.toLocaleDateString([],{weekday:'narrow'});
+    const count=meals.filter(m=>m.date===ds).length;
+    days.push({ds,dayLabel,count});
+  }
+
+  const totalDaysInPeriod=periodDays;
+  // Group meals by date for average
+  const dateSet=new Set(meals.map(m=>m.date));
+  const daysWithMeals=dateSet.size;
+  const avg=meals.length/Math.min(totalDaysInPeriod, Math.max(daysWithMeals,1));
+
+  const maxCount=Math.max(...days.map(d=>d.count),1);
+
+  const dots=days.map(d=>{
+    const size=d.count===0?6:Math.max(10,Math.min(28,8+(d.count/maxCount)*20));
+    const opacity=d.count===0?0.15:0.3+0.7*(d.count/maxCount);
+    return`<div class="dot-col">
+      <div class="dot-circle" style="width:${size}px;height:${size}px;opacity:${opacity}"></div>
+      <div class="dot-day-label">${d.dayLabel}</div>
+    </div>`;
+  }).join('');
+
+  return mCard('Meals per day',
+    `<div class="metric-visual"><div class="dot-row">${dots}</div></div>
+     <div class="metric-label">${avg.toFixed(1)} meals/day average</div>
+     <div class="metric-sub">${meals.length} total meals over the period</div>`);
+}
+
+function renderTimeOfDay(meals){
+  const morning=meals.filter(m=>{const h=new Date(m.time).getHours();return h<12}).length;
+  const afternoon=meals.filter(m=>{const h=new Date(m.time).getHours();return h>=12&&h<17}).length;
+  const evening=meals.filter(m=>{const h=new Date(m.time).getHours();return h>=17}).length;
+  const total=morning+afternoon+evening;
+  if(!total) return mCard('When you eat','<div class="metric-empty">Log some meals to see patterns</div>');
+
+  const maxDots=15;
+  function dots(n){
+    const scaled=Math.max(0,Math.min(maxDots,Math.round((n/total)*maxDots*3)));
+    return Array(scaled).fill('<div class="time-dot"></div>').join('');
+  }
+
+  const peak=morning>=afternoon&&morning>=evening?'morning':afternoon>=evening?'afternoon':'evening';
+
+  return mCard('When you eat',
+    `<div class="metric-visual" style="width:100%">
+      <div class="time-zones">
+        <div class="time-zone time-zone-morning">
+          <div class="time-dots">${dots(morning)}</div>
+          <div class="time-zone-label">morning</div>
+        </div>
+        <div class="time-zone time-zone-afternoon">
+          <div class="time-dots">${dots(afternoon)}</div>
+          <div class="time-zone-label">afternoon</div>
+        </div>
+        <div class="time-zone time-zone-evening">
+          <div class="time-dots">${dots(evening)}</div>
+          <div class="time-zone-label">evening</div>
+        </div>
+      </div>
+    </div>
+    <div class="metric-sub">Most meals in the ${peak}</div>`);
+}
+
+function mCard(title,inner){
+  return`<div class="metric-card">
+    <div class="metric-title">${title}</div>
+    ${inner}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════
+   Export CSV
+   ══════════════════════════════════════════ */
+document.getElementById('exportBtn').addEventListener('click',async()=>{
+  const r=weekRange(0);
+  const meals=await dbRange(r.start,r.end);
+  if(!meals.length){showDialog('Nothing to export this week.',null);return}
+  const rows=[['Date','Time','Hunger (1-3)','Satisfaction (1-3)','Note']];
+  meals.forEach(m=>rows.push([m.date,fmtTime(m.time),m.hunger||'',m.satisfaction||'',m.note||'']));
+  const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const b=new Blob([csv],{type:'text/csv'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u;a.download=`gentle-eats-${r.start}.csv`;a.click();
+  URL.revokeObjectURL(u);
+});
+
+/* ══════════════════════════════════════════
+   Clear all
+   ══════════════════════════════════════════ */
+document.getElementById('clearAllBtn').addEventListener('click',()=>{
+  showDialog('Clear all meal data and photos? This can\'t be undone.',async()=>{
+    await dbClear();renderToday();
+  });
+});
+
+/* ══════════════════════════════════════════
+   Dialog
+   ══════════════════════════════════════════ */
+let confirmAction=null;
+
+function showDialog(msg,action){
+  document.getElementById('dialogMsg').textContent=msg;
+  document.getElementById('overlay').classList.add('visible');
+  confirmAction=action;
+  if(!action){
+    document.getElementById('dialogCancel').style.display='none';
+    document.getElementById('dialogConfirm').textContent='OK';
+  }else{
+    document.getElementById('dialogCancel').style.display='';
+    document.getElementById('dialogConfirm').textContent='Yes';
+  }
+}
+
+function hideDialog(){document.getElementById('overlay').classList.remove('visible');confirmAction=null}
+
+document.getElementById('dialogConfirm').addEventListener('click',()=>{if(confirmAction)confirmAction();hideDialog()});
+document.getElementById('dialogCancel').addEventListener('click',hideDialog);
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)hideDialog()});
+
+/* ══════════════════════════════════════════
+   Init
+   ══════════════════════════════════════════ */
+(async()=>{await openDB();renderToday()})();
+</script>
+</body>
+</html>
