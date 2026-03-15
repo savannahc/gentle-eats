@@ -57,7 +57,7 @@ header h1{
   font-family:'Nunito',-apple-system,system-ui,sans-serif;
 }
 
-.week-nav{display:flex;gap:6px;align-items:center}
+.week-nav{display:flex;gap:6px;align-items:center;justify-content:center;margin-bottom:16px}
 
 .week-nav button{
   width:36px;height:36px;border-radius:50%;
@@ -97,11 +97,12 @@ header h1{
   position:fixed;bottom:28px;right:max(16px,calc((100% - 480px)/2 + 16px));
   width:56px;height:56px;border-radius:50%;
   background:var(--accent);color:#fff;border:none;
-  font-size:1.8rem;font-weight:300;line-height:1;
+  font-size:2rem;font-weight:300;
   cursor:pointer;z-index:30;
   box-shadow:0 6px 20px rgba(255,89,36,.35);
   display:flex;align-items:center;justify-content:center;
   transition:transform .15s,opacity .15s;
+  padding:0;padding-bottom:2px;
 }
 .fab-add:active{transform:scale(.92)}
 
@@ -203,6 +204,22 @@ header h1{
   min-height:52px;
 }
 .cancel-edit-btn:active{background:var(--accent-light)}
+
+/* Hunger summary card */
+.hunger-summary{
+  background:var(--card);border-radius:var(--radius);
+  padding:16px 20px;margin-bottom:20px;
+  box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.hunger-summary-label{
+  font-size:.62rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--text-soft);
+}
+.hunger-summary-pct{
+  font-size:1.6rem;font-weight:700;color:var(--accent);
+  font-family:'Nunito',inherit;letter-spacing:-.02em;
+}
 
 /* Today's meal feed */
 .today-feed h2{
@@ -474,11 +491,6 @@ header h1{
 <div class="app">
   <header>
     <h1>Kenko</h1>
-    <div class="week-nav" id="weekNav" style="display:none">
-      <button id="prevWeek">‹</button>
-      <span class="week-label" id="weekLabel"></span>
-      <button id="nextWeek">›</button>
-    </div>
   </header>
 
   <div class="tabs">
@@ -488,10 +500,21 @@ header h1{
     <button class="tab" data-tab="settings">More</button>
   </div>
 
+  <div class="week-nav" id="weekNav" style="display:none">
+    <button id="prevWeek">‹</button>
+    <span class="week-label" id="weekLabel"></span>
+    <button id="nextWeek">›</button>
+  </div>
+
   <!-- TODAY -->
   <div class="view active" id="todayView">
     <input type="file" id="cameraInput" accept="image/*" capture="environment">
     <button class="fab-add" id="addMealBtn">+</button>
+
+    <div class="hunger-summary" id="hungerSummary" style="display:none">
+      <span class="hunger-summary-label">Eaten when hungry</span>
+      <span class="hunger-summary-pct" id="hungerSummaryPct">--</span>
+    </div>
 
     <div class="today-feed" id="todayFeed"></div>
 
@@ -861,6 +884,21 @@ async function renderToday(){
   const todayDate=today();
   // Get today's meals
   const todayMeals=await dbRange(todayDate,todayDate);
+
+  // Update hunger summary card (last 7 days)
+  const summaryStart=new Date();summaryStart.setDate(summaryStart.getDate()-6);
+  const allRecent=await dbRange(localDateStr(summaryStart),todayDate);
+  const withHunger=allRecent.filter(m=>m.hunger!==null&&m.hunger!==undefined);
+  const summaryEl=document.getElementById('hungerSummary');
+  if(withHunger.length>0){
+    const hungry=withHunger.filter(m=>m.hunger>=2).length;
+    const pct=Math.round((hungry/withHunger.length)*100);
+    document.getElementById('hungerSummaryPct').textContent=pct+'%';
+    summaryEl.style.display='flex';
+  }else{
+    summaryEl.style.display='none';
+  }
+
   // Get last 6 days before today for recent section
   const recentStart=new Date();recentStart.setDate(recentStart.getDate()-6);
   const recentStartStr=localDateStr(recentStart);
