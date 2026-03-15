@@ -83,15 +83,16 @@ header h1{
   box-shadow:0 6px 20px rgba(255,89,36,.35);
   display:flex;align-items:center;justify-content:center;
   transition:transform .3s ease,background .3s ease,box-shadow .3s ease;
-  padding:0;padding-bottom:2px;
+  padding:0;
 }
+.fab-add img{width:22px;height:22px;filter:brightness(0) invert(1);transform:rotate(-45deg);transition:transform .3s ease}
 .fab-add:active{transform:scale(.92)}
 .fab-add.close-mode{
-  transform:rotate(45deg);
   background:var(--rose);
   box-shadow:0 6px 20px rgba(255,125,211,.35);
 }
-.fab-add.close-mode:active{transform:rotate(45deg) scale(.92)}
+.fab-add.close-mode img{transform:rotate(0deg)}
+.fab-add.close-mode:active{transform:scale(.92)}
 
 #cameraInput{display:none}
 
@@ -422,6 +423,18 @@ header h1{
 .dialog-btns .cancel{background:#fff;color:var(--text-soft)}
 .dialog-btns .confirm{background:var(--accent);color:#fff;border-color:var(--accent)}
 
+/* Inline SVG icons */
+.icon{display:inline-block;width:1em;height:1em;vertical-align:middle;object-fit:contain}
+.icon-white{filter:brightness(0) invert(1)}
+.icon-accent{filter:brightness(0) saturate(100%) invert(36%) sepia(85%) saturate(2000%) hue-rotate(5deg) brightness(100%) contrast(100%)}
+.icon-soft{filter:brightness(0) opacity(.45)}
+.icon-rose{filter:brightness(0) saturate(100%) invert(60%) sepia(80%) saturate(3000%) hue-rotate(290deg) brightness(100%) contrast(100%)}
+
+/* Tab icons */
+.tab{display:flex;align-items:center;justify-content:center;gap:5px}
+.tab .icon{width:16px;height:16px;filter:brightness(0) opacity(.4)}
+.tab.active .icon{filter:brightness(0) saturate(100%) invert(36%) sepia(85%) saturate(2000%) hue-rotate(5deg) brightness(100%) contrast(100%)}
+
 @media(max-width:360px){
   html{font-size:14px}
   .day-grid{grid-template-columns:repeat(2,1fr)}
@@ -435,15 +448,15 @@ header h1{
   </header>
 
   <div class="tabs">
-    <button class="tab active" data-tab="today">Today</button>
-    <button class="tab" data-tab="metrics">Metrics</button>
-    <button class="tab" data-tab="settings">More</button>
+    <button class="tab active" data-tab="today"><img src="home.svg" class="icon">Today</button>
+    <button class="tab" data-tab="metrics"><img src="analytics.svg" class="icon">Metrics</button>
+    <button class="tab" data-tab="settings"><img src="setting.svg" class="icon">More</button>
   </div>
 
   <!-- TODAY -->
   <div class="view active" id="todayView">
     <input type="file" id="cameraInput" accept="image/*" capture="environment">
-    <button class="fab-add" id="addMealBtn">+</button>
+    <button class="fab-add" id="addMealBtn"><img src="cross.svg" alt=""></button>
 
     <div class="hunger-summary" id="hungerSummary" style="display:none">
       <span class="hunger-summary-label">Eaten when hungry</span>
@@ -457,7 +470,7 @@ header h1{
       <div class="capture-panel-inner">
         <div class="photo-preview" id="photoPreview">
           <img id="previewImg" alt="Meal photo">
-          <button class="retake-btn" id="retakeBtn">Retake</button>
+          <button class="retake-btn" id="retakeBtn"><img src="camera.svg" class="icon icon-white" style="width:14px;height:14px;margin-right:4px">Retake</button>
         </div>
         <div class="scales">
           <div class="scale-row">
@@ -480,7 +493,7 @@ header h1{
         <div class="note-row">
           <textarea id="noteInput" rows="1" placeholder="Optional note…"></textarea>
         </div>
-        <button class="save-btn" id="saveBtn">Save Meal</button>
+        <button class="save-btn" id="saveBtn"><img src="tick.svg" class="icon icon-white" style="width:14px;height:14px;margin-right:5px">Save Meal</button>
       </div>
     </div>
   </div>
@@ -501,11 +514,11 @@ header h1{
       <h2>Settings</h2>
       <div class="setting-item">
         <span>Export this week</span>
-        <button id="exportBtn">CSV</button>
+        <button id="exportBtn"><img src="download.svg" class="icon icon-soft" style="width:13px;height:13px;margin-right:4px">CSV</button>
       </div>
       <div class="setting-item">
         <span>Clear all data</span>
-        <button class="danger" id="clearAllBtn">Clear</button>
+        <button class="danger" id="clearAllBtn"><img src="delete.svg" class="icon icon-rose" style="width:13px;height:13px;margin-right:4px">Clear</button>
       </div>
     </div>
   </div>
@@ -517,8 +530,8 @@ header h1{
   <div class="dialog">
     <p id="dialogMsg"></p>
     <div class="dialog-btns">
-      <button class="cancel" id="dialogCancel">Cancel</button>
-      <button class="confirm" id="dialogConfirm">Yes</button>
+      <button class="cancel" id="dialogCancel"><img src="cross.svg" class="icon icon-soft" style="width:11px;height:11px;margin-right:4px">Cancel</button>
+      <button class="confirm" id="dialogConfirm"><img src="tick.svg" class="icon icon-white" style="width:11px;height:11px;margin-right:4px">Yes</button>
     </div>
   </div>
 </div>
@@ -726,9 +739,9 @@ noteIn.addEventListener('input',()=>autoR(noteIn));
    Toast
    ══════════════════════════════════════════ */
 let toastTimer=null;
-function showToast(msg){
+function showToast(msg,iconSrc){
   const el=document.getElementById('toast');
-  el.textContent=msg;
+  el.innerHTML=msg+(iconSrc?` <img src="${iconSrc}" class="icon icon-white" style="width:13px;height:13px;margin-left:4px">`:'');
   el.classList.add('visible');
   clearTimeout(toastTimer);
   toastTimer=setTimeout(()=>el.classList.remove('visible'),2200);
@@ -744,7 +757,7 @@ function resetForm(){
   hunger=null;satisfaction=null;
   document.querySelectorAll('.scale-btn').forEach(b=>b.classList.remove('selected'));
   editingMeal=null;
-  document.getElementById('saveBtn').textContent='Save Meal';
+  document.getElementById('saveBtn').innerHTML='<img src="tick.svg" class="icon icon-white" style="width:14px;height:14px;margin-right:5px">Save Meal';
 }
 
 function cancelEdit(){
@@ -777,7 +790,7 @@ function startEdit(meal){
   noteIn.value=meal.note||'';
   autoR(noteIn);
   // UI
-  document.getElementById('saveBtn').textContent='Update Meal';
+  document.getElementById('saveBtn').innerHTML='<img src="tick.svg" class="icon icon-white" style="width:14px;height:14px;margin-right:5px">Update Meal';
   showPanel();
 }
 
@@ -799,7 +812,7 @@ document.getElementById('saveBtn').addEventListener('click',async()=>{
       note:noteIn.value.trim()||null
     };
     try{ await dbPut(meal) }catch(err){ console.error('Update failed',err);return }
-    showToast('Meal updated ✓');
+    showToast('Meal updated','tick.svg');
   }else{
     const meal={
       date:today(),
@@ -809,7 +822,7 @@ document.getElementById('saveBtn').addEventListener('click',async()=>{
       note:noteIn.value.trim()||null
     };
     try{ await dbAdd(meal) }catch(err){ console.error('Save failed',err);return }
-    showToast('Meal logged ✓');
+    showToast('Meal logged','tick.svg');
   }
 
   cancelEdit();
@@ -878,8 +891,8 @@ async function renderToday(){
 
 function renderMealCard(m){
   const time=fmtTime(m.time);
-  const ht=m.hunger?`🍽 ${hLabels[m.hunger]}`:'';
-  const st=m.satisfaction?`✦ ${sLabels[m.satisfaction]}`:'';
+  const ht=m.hunger?`<img src="cutlery.svg" class="icon icon-soft" style="width:12px;height:12px"> ${hLabels[m.hunger]}`:'';
+  const st=m.satisfaction?`<img src="star.svg" class="icon icon-soft" style="width:12px;height:12px"> ${sLabels[m.satisfaction]}`:'';
 
   if(m.photo){
     return`<div class="meal-card" data-meal-id="${m.id}">
