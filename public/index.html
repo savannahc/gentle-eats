@@ -713,11 +713,10 @@ const prevImg=document.getElementById('previewImg');
 const capturePanel=document.getElementById('capturePanel');
 
 const fabBtn=document.getElementById('addMealBtn');
-let panelOpen=false;
 
 /* FAB → open camera or close panel */
 fabBtn.addEventListener('click',()=>{
-  if(panelOpen){
+  if(capturePanel.classList.contains('active')){
     hidePanel();
   } else {
     camIn.click();
@@ -737,12 +736,10 @@ document.getElementById('retakeBtn').addEventListener('click',()=>{
 function showPanel(){
   capturePanel.classList.add('active');
   fabBtn.classList.add('close-mode');
-  panelOpen=true;
 }
 function hidePanel(){
   capturePanel.classList.remove('active');
   fabBtn.classList.remove('close-mode');
-  panelOpen=false;
 }
 
 camIn.addEventListener('change',e=>{
