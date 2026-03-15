@@ -1,4 +1,4 @@
-# Gentle Eats
+# Kenko
 
 A non-addictive meal tracker focused on how food makes you feel, not calorie counting.
 
