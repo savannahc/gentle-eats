@@ -1193,11 +1193,12 @@ function renderMealsPerDay(meals,periodDays){
     days.push({ds,dayLabel,count});
   }
 
-  const totalDaysInPeriod=periodDays;
-  // Group meals by date for average
-  const dateSet=new Set(meals.map(m=>m.date));
-  const daysWithMeals=dateSet.size;
-  const avg=meals.length/Math.min(totalDaysInPeriod, Math.max(daysWithMeals,1));
+  // Only count fully completed days for average (exclude today)
+  const todayStr=localDateStr(new Date());
+  const completedMeals=meals.filter(m=>m.date!==todayStr);
+  const completedDates=new Set(completedMeals.map(m=>m.date));
+  const completedDays=Math.max(completedDates.size,1);
+  const avg=completedMeals.length/completedDays;
 
   const maxCount=Math.max(...days.map(d=>d.count),1);
 
